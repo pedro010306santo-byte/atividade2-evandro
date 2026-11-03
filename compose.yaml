@@ -1,0 +1,63 @@
+services:
+  database:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: ${DB_NAME:?Defina DB_NAME}
+      POSTGRES_USER: ${DB_USER:?Defina DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD}
+    volumes:
+      - saude_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+  init:
+    build: ./backend
+    env_file: .env
+    environment:
+      DB_HOST: database
+      DB_PORT: "5432"
+    command: ["node", "database/init.js"]
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: "no"
+  backend:
+    build: ./backend
+    env_file: .env
+    environment:
+      DB_HOST: database
+      DB_PORT: "5432"
+      PORT: "40000"
+    ports:
+      - "127.0.0.1:40000:40000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:40000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+  frontend:
+    build: ./frontend
+    env_file: .env
+    environment:
+      API_URL: http://backend:40000
+      FRONT_PORT: "40100"
+    ports:
+      - "127.0.0.1:40100:40100"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:40100/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+volumes:
+  saude_data:

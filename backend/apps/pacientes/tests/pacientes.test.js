@@ -1,0 +1,30 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const {api}=require('../../../../tests/helpers/api')({authenticate:true});
+test('lista pacientes exige JWT e rejeita token adulterado/expirado',async()=>{
+ assert.equal((await api('/GetAllPacientes','GET',undefined,null)).status,401);
+ assert.equal((await api('/GetAllPacientes','GET',undefined,'invalid')).status,401);
+ const jwt=require('../../../node_modules/jsonwebtoken');
+ const expired=jwt.sign({username:'estudante'},process.env.JWT_SECRET,{expiresIn:-1,issuer:'dw3-saude',audience:'dw3-frontend'});
+ assert.equal((await api('/GetAllPacientes','GET',undefined,expired)).status,401);
+ const r=await api('/GetAllPacientes');assert.equal(r.status,200);assert.deepEqual(r.body.registro,[]);
+});
+let pacienteID;
+test('CRUD completo de pacientes preserva a linha ao remover e valida entradas',async()=>{
+ const body={nome:'Paciente de teste',telefone:'1700000000',datanascimento:'2001-02-03'};
+ assert.equal((await api('/InsertPaciente','POST',{...body,nome:''})).status,400);
+ assert.equal((await api('/InsertPaciente','POST',{...body,datanascimento:'2026-02-30'})).status,400);
+ let r=await api('/InsertPaciente','POST',body);assert.equal(r.status,201);pacienteID=r.body.registro.id;
+ assert.ok(pacienteID);assert.equal(r.body.registro.removido,false);
+ r=await api('/GetPacienteByID/'+pacienteID);assert.equal(r.body.registro.nome,body.nome);
+ r=await api('/UpdatePaciente/'+pacienteID,'PUT',{...body,nome:'Paciente editado'});assert.equal(r.status,200);
+ assert.equal((await api('/GetPacienteByID/'+pacienteID)).body.registro.nome,'Paciente editado');
+ assert.equal((await api('/GetPacienteByID/0')).status,400);
+ assert.equal((await api('/GetPacienteByID/999999')).status,404);
+ assert.equal((await api('/DeletePaciente/'+pacienteID,'DELETE')).status,200);
+ assert.equal((await api('/GetPacienteByID/'+pacienteID)).status,404);
+ assert.deepEqual((await api('/GetAllPacientes')).body.registro,[]);
+ assert.equal((await api('/UpdatePaciente/'+pacienteID,'PUT',body)).status,404);
+ const db=require('../../../database/databaseconfig');
+ assert.equal((await db.query('SELECT removido FROM pacientes WHERE id=$1',[pacienteID])).rows[0].removido,true);
+});

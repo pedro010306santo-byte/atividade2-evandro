@@ -1,0 +1,35 @@
+{
+  "paciente_id": 1,
+  "consulta_id": 1,
+  "paginas": [
+    {
+      "pagina": "/",
+      "status": 200
+    },
+    {
+      "pagina": "/pacientes",
+      "status": 200
+    },
+    {
+      "pagina": "/consultas",
+      "status": 200
+    },
+    {
+      "pagina": "/pacientes/1",
+      "status": 200
+    },
+    {
+      "pagina": "/consultas/1",
+      "status": 200
+    },
+    {
+      "pagina": "/pacientes/1/editar",
+      "status": 200
+    },
+    {
+      "pagina": "/consultas/1/editar",
+      "status": 200
+    }
+  ],
+  "observacao": "Login e páginas HTTP reais; somente dados fictícios."
+}

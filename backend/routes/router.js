@@ -1,0 +1,16 @@
+const router=require('express').Router();
+router.post('/Login',require('../apps/login/controller/ctlLogin').Login);
+router.use(require('../middleware/auth'));
+router.get('/GetAllPacientes',require('../apps/pacientes/controller/ctlPacientes').GetAllPacientes);
+const p=require('../apps/pacientes/controller/ctlPacientes');
+router.get('/GetPacienteByID/:id',p.GetPacienteByID);
+router.post('/InsertPaciente',p.InsertPaciente);
+router.put('/UpdatePaciente/:id',p.UpdatePaciente);
+router.delete('/DeletePaciente/:id',p.DeletePaciente);
+const c=require('../apps/consultas/controller/ctlConsultas');
+router.get('/GetAllConsultas',c.GetAllConsultas);
+router.get('/GetConsultaByID/:id',c.GetConsultaByID);
+router.post('/InsertConsulta',c.InsertConsulta);
+router.put('/UpdateConsulta/:id',c.UpdateConsulta);
+router.delete('/DeleteConsulta/:id',c.DeleteConsulta);
+module.exports=router;

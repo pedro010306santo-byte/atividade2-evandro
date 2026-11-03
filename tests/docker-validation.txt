@@ -1,0 +1,30 @@
+PASS backend container consulta PostgreSQL
+PASS frontend container acessível pela rede Docker
+PASS API recusa ausência de JWT
+PASS API recusa JWT adulterado
+PASS API recusa JWT expirado
+PASS login recusa senha incorreta
+PASS login real em container emite JWT
+PASS tela de login real
+PASS login frontend -> backend e cookie HttpOnly
+PASS painel autenticado real
+PASS frontend cadastra paciente via API em outro container
+PASS paciente persistido no PostgreSQL Docker
+PASS frontend lista paciente
+PASS frontend busca paciente
+PASS frontend atualiza paciente
+PASS frontend cadastra consulta relacionada
+PASS frontend lista consultas
+PASS frontend busca consulta
+PASS frontend atualiza consulta
+PASS API retorna decimal atualizado
+PASS bloqueia paciente com consulta ativa
+PASS frontend recusa remoção sem CSRF
+PASS frontend remove consulta
+PASS API oculta consulta removida
+PASS frontend remove paciente
+PASS API oculta paciente removido
+PASS soft delete preserva ambas as linhas no PostgreSQL
+PASS logout real
+PASS sessão encerrada exige login
+TOTAL 29 verificações aprovadas; dados fictícios preservados como removidos.

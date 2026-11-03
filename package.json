@@ -1,0 +1,9 @@
+{
+  "name": "dw3-projeto-saude",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node tests/run.js",
+    "test:api": "node tests/run.js tests/api.test.js"
+  }
+}

@@ -1,0 +1,28 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const {api}=require('../../../../tests/helpers/api')({authenticate:true});
+test('CRUD consultas relaciona paciente, valida valor/data e aplica soft delete',async()=>{
+ const p=(await api('/InsertPaciente','POST',{nome:'Paciente relação',datanascimento:'1999-01-01'})).body.registro;
+ const body={pacienteid:p.id,descricao:'Consulta fictícia',dataconsulta:'2026-11-03',valor:'150.25'};
+ for(const [route,method] of [['/GetAllConsultas','GET'],['/GetConsultaByID/1','GET'],['/InsertConsulta','POST'],['/UpdateConsulta/1','PUT'],['/DeleteConsulta/1','DELETE']])assert.equal((await api(route,method,method==='POST'||method==='PUT'?body:undefined,null)).status,401);
+ assert.equal((await api('/InsertConsulta','POST',{...body,valor:'-1'})).status,400);
+ assert.equal((await api('/InsertConsulta','POST',{...body,valor:'1.999'})).status,400);
+ assert.equal((await api('/InsertConsulta','POST',{...body,dataconsulta:'2026-02-30'})).status,400);
+ assert.equal((await api('/InsertConsulta','POST',{...body,pacienteid:999999})).status,404);
+ const r=await api('/InsertConsulta','POST',body);assert.equal(r.status,201);const id=r.body.registro.id;
+ assert.equal(r.body.registro.valor,'150.25');assert.equal(r.body.registro.pacienteid,p.id);
+ assert.equal((await api('/GetAllConsultas')).body.registro.length,1);
+ assert.equal((await api('/GetConsultaByID/'+id)).body.registro.pacientenome,p.nome);
+ assert.equal((await api('/DeletePaciente/'+p.id,'DELETE')).status,409);
+ assert.equal((await api('/UpdateConsulta/'+id,'PUT',{...body,descricao:'Retorno',valor:'99.90'})).status,200);
+ assert.equal((await api('/GetConsultaByID/'+id)).body.registro.valor,'99.90');
+ assert.equal((await api('/DeleteConsulta/'+id,'DELETE')).status,200);
+ assert.equal((await api('/GetConsultaByID/'+id)).status,404);
+ assert.deepEqual((await api('/GetAllConsultas')).body.registro,[]);
+ assert.equal((await api('/UpdateConsulta/'+id,'PUT',body)).status,404);
+ assert.equal((await api('/DeleteConsulta/'+id,'DELETE')).status,404);
+ const db=require('../../../database/databaseconfig');
+ assert.equal((await db.query('SELECT removido FROM consultas WHERE id=$1',[id])).rows[0].removido,true);
+ assert.equal((await api('/DeletePaciente/'+p.id,'DELETE')).status,200);
+ assert.equal((await api('/InsertConsulta','POST',body)).status,404);
+});

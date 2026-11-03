@@ -1,0 +1,19 @@
+REFATORAÇÃO DE ORGANIZAÇÃO DW3 — EVIDÊNCIAS DA ETAPA
+
+Referências lidas: dw3-apostila.texto.json (p. 61, 63, 66, 78, 92-93, 100-102 e 123-126) e dw3-atividade-02.pdf completo.
+Escopo: separar routers de páginas, distribuir testes de API por módulo e manter o runner.
+
+1. Baseline: npm test -> 9 testes, 9 aprovados, 0 falhas; PostgreSQL real.
+2. RED rotas: node --test tests/organization.test.js -> 1 falha esperada: Módulo de rota deve existir: rtIndex.
+3. GREEN rotas: mesmo comando -> 1 aprovado; npm test -> 9 aprovados, 0 falhas.
+4. RED organização de testes: node --test tests/organization.test.js -> 1 aprovado, 1 falha esperada: Testes devem existir no módulo: login.
+5. GREEN após distribuição e ajuste do runner: npm test -> 11 testes, 11 aprovados, 0 falhas.
+6. Execução isolada pelo runner: pacientes -> 2/2; login -> 1/1; consultas -> 1/1. Nova execução completa -> 11/11, 0 falhas.
+7. Verificação automática dos nomes: todos os 9 testes anteriores preservados, 11 no total. README.md e README.txt idênticos. git diff --check sem erros (somente avisos de conversão LF/CRLF).
+8. Serviços de demonstração preservados: /health nas portas 40000 e 40100 respondeu HTTP 200, com database=ok no back-end. Os processos antigos não foram reiniciados para carregar os novos arquivos; os testes executaram o código atualizado em servidores temporários.
+
+As nove verificações comportamentais existentes foram preservadas. Os dois testes adicionais são contratos estruturais exigidos nesta etapa. Não constituem prova de TDD histórico de todo o projeto.
+A integração front-end permanece em tests/frontend.test.js por atravessar autenticação, pacientes e consultas. Infraestrutura global permanece em tests/api.test.js. As suítes por módulo não dependem de um arquivo anterior de login.
+
+Assistência de IA utilizada na refatoração e documentação. Não se afirma autoria independente nem validação pedagógica integral.
+Docker, publicação e envio no Moodle não foram executados nesta etapa. Dockerfiles, compose e configurações/credenciais não foram alterados. Nenhum serviço de demonstração foi encerrado; os testes usam servidores temporários e banco separado terminado em _test.
