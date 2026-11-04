@@ -15,7 +15,7 @@ async function main(){
  try{if(!(await client.query('SELECT 1 FROM pg_database WHERE datname=$1',[name])).rowCount)await client.query('CREATE DATABASE "'+name+'"');}finally{await client.end();}
  env.DB_NAME=name;
  const files=process.argv.slice(2);if(!files.length)files.push(
-  'tests/organization.test.js','tests/api.test.js',
+  'tests/organization.test.js','tests/frontend-security.test.js','tests/api.test.js',
   'backend/apps/login/tests/login.test.js',
   'backend/apps/pacientes/tests/pacientes.test.js',
   'backend/apps/consultas/tests/consultas.test.js',

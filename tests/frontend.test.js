@@ -21,6 +21,18 @@ before(async()=>{
  base='http://127.0.0.1:'+front.address().port;
 });
 after(async()=>{for(const s of [front,backend])if(s)await new Promise(r=>s.close(r));await require('../backend/database/databaseconfig').end();});
+test('páginas protegidas recusam cookie ausente ou falsificado',async()=>{
+ for(const cookie of ['', 'token-falso']){
+  jar=cookie?{auth:cookie}:{};
+  for(const route of ['/', '/pacientes', '/pacientes/novo', '/consultas/novo']){
+   const r=await request(route);
+   assert.equal(r.status,303);assert.equal(r.location,'/login');
+   assert.equal(r.cookies.some(c=>c.startsWith('auth=token-falso')),false);
+   assert.equal((await fetch(base+route,{redirect:'manual',headers:{Cookie:cookie?'auth='+cookie:''}})).headers.get('cache-control'),'no-store');
+  }
+ }
+ jar={};
+});
 test('login front-end guarda JWT HttpOnly e bloqueia alteração sem CSRF',async()=>{
  assert.equal((await request('/')).location,'/login');
  let r=await request('/login');assert.equal(r.status,200);csrfToken=csrf(r.text);

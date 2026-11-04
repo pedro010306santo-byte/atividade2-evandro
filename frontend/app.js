@@ -27,7 +27,12 @@ function createApp({apiUrl=process.env.API_URL||'http://127.0.0.1:40000'}={}){
   }
   next();
  });
- const protect=(req,res,next)=>req.cookies.auth?next():res.redirect(303,'/login');
+ // A presença do cookie não prova autenticação: a API precisa validar o JWT.
+ const protect=async(req,res,next)=>{
+  res.set('Cache-Control','no-store');
+  if(!req.cookies.auth)return res.redirect(303,'/login');
+  try{await api.GetAllPacientes(req.cookies.auth);next();}catch(error){next(error);}
+ };
  app.get('/health',(req,res)=>res.json({status:'ok'}));
  const dependencies={api,protect,cookieOptions};
  app.use('/',require('./routes/rtLogin')(dependencies));

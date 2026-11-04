@@ -1,16 +1,20 @@
-const router=require('express').Router();
-router.post('/Login',require('../apps/login/controller/ctlLogin').Login);
-router.use(require('../middleware/auth'));
-router.get('/GetAllPacientes',require('../apps/pacientes/controller/ctlPacientes').GetAllPacientes);
-const p=require('../apps/pacientes/controller/ctlPacientes');
-router.get('/GetPacienteByID/:id',p.GetPacienteByID);
-router.post('/InsertPaciente',p.InsertPaciente);
-router.put('/UpdatePaciente/:id',p.UpdatePaciente);
-router.delete('/DeletePaciente/:id',p.DeletePaciente);
-const c=require('../apps/consultas/controller/ctlConsultas');
-router.get('/GetAllConsultas',c.GetAllConsultas);
-router.get('/GetConsultaByID/:id',c.GetConsultaByID);
-router.post('/InsertConsulta',c.InsertConsulta);
-router.put('/UpdateConsulta/:id',c.UpdateConsulta);
-router.delete('/DeleteConsulta/:id',c.DeleteConsulta);
-module.exports=router;
+const express = require('express');
+const router = express.Router();
+const appLogin = require('../apps/login/controller/ctlLogin');
+const appPacientes = require('../apps/pacientes/controller/ctlPacientes');
+const appConsultas = require('../apps/consultas/controller/ctlConsultas');
+const AutenticaJWT = require('../middleware/auth');
+
+router.post('/Login', appLogin.Login);
+// Como no exemplo de aula: rota -> autenticação -> controller -> model.
+router.get('/GetAllPacientes', AutenticaJWT, appPacientes.GetAllPacientes);
+router.get('/GetPacienteByID/:id', AutenticaJWT, appPacientes.GetPacienteByID);
+router.post('/InsertPaciente', AutenticaJWT, appPacientes.InsertPaciente);
+router.put('/UpdatePaciente/:id', AutenticaJWT, appPacientes.UpdatePaciente);
+router.delete('/DeletePaciente/:id', AutenticaJWT, appPacientes.DeletePaciente);
+router.get('/GetAllConsultas', AutenticaJWT, appConsultas.GetAllConsultas);
+router.get('/GetConsultaByID/:id', AutenticaJWT, appConsultas.GetConsultaByID);
+router.post('/InsertConsulta', AutenticaJWT, appConsultas.InsertConsulta);
+router.put('/UpdateConsulta/:id', AutenticaJWT, appConsultas.UpdateConsulta);
+router.delete('/DeleteConsulta/:id', AutenticaJWT, appConsultas.DeleteConsulta);
+module.exports = router;
