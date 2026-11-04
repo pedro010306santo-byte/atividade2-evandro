@@ -1,5 +1,0 @@
-Revisão independente encontrou um erro de tratamento CSRF com caracteres Unicode: retorno 500 em vez de 403.
-O caso foi reproduzido por teste de regressão antes da correção.
-Correção: validar o formato hexadecimal ASCII de 64 caracteres antes de timingSafeEqual.
-Suíte npm test após a correção: 9 aprovados, 0 falhas.
-Não houve nova aprovação independente após o ajuste; a correção foi verificada por regressão e suíte completa.
